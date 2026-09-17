@@ -11,6 +11,7 @@ interface CartContextType {
   totalItems: number;
   addItem: (product: Product) => void;
   removeItem: (id: number) => void;
+  updateQuantity: (id: number, delta: number) => void;
 }
 
 // 2. Se crea el contexto. Arranca en null porque su valor real
@@ -48,11 +49,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
+  // delta es +1 (botón "+") o -1 (botón "-"). Math.max(1, ...) es la regla
+  // de negocio "nunca bajar de 1 unidad": si quantity ya es 1 y delta es -1,
+  // el resultado sigue siendo 1, por eso el botón "-" no tiene efecto visible.
+  const updateQuantity = (id: number, delta: number) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    );
+  };
+
   // Valor derivado: no necesita su propio useState, se recalcula en cada render.
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, totalItems, addItem, removeItem }}>
+    <CartContext.Provider
+      value={{ items, totalItems, addItem, removeItem, updateQuantity }}
+    >
       {children}
     </CartContext.Provider>
   );

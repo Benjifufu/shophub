@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
-  const { items, removeItem } = useCart();
+  const { items, removeItem, updateQuantity } = useCart();
 
   // Valor derivado, igual que totalItems en el contexto: se recalcula
   // en cada render a partir de items, no se guarda en un useState aparte.
@@ -59,9 +59,7 @@ export default function CartPage() {
               >
                 {item.title}
               </Link>
-              <p className="text-sm text-slate-500">
-                {item.quantity} × ${item.price}
-              </p>
+              <p className="text-sm text-slate-500">${item.price} c/u</p>
               <Link
                 href={`/products/${item.id}`}
                 className="text-xs text-slate-600 hover:underline"
@@ -70,7 +68,29 @@ export default function CartPage() {
               </Link>
             </div>
 
-            <p className="font-semibold text-slate-900">
+            {/* Control de cantidad: - / número / + */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => updateQuantity(item.id, -1)}
+                disabled={item.quantity === 1}
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300"
+              >
+                −
+              </button>
+
+              <span className="w-6 text-center text-sm font-medium text-slate-900">
+                {item.quantity}
+              </span>
+
+              <button
+                onClick={() => updateQuantity(item.id, 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-100"
+              >
+                +
+              </button>
+            </div>
+
+            <p className="w-20 text-right font-semibold text-slate-900">
               ${(item.price * item.quantity).toFixed(2)}
             </p>
 
@@ -89,15 +109,6 @@ export default function CartPage() {
         <span className="text-lg font-semibold text-slate-900">
           ${total.toFixed(2)}
         </span>
-      </div>
-
-      <div className="mt-6">
-        <Link
-          href="/"
-          className="inline-block rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-        >
-          Seguir comprando
-        </Link>
       </div>
     </section>
   );
