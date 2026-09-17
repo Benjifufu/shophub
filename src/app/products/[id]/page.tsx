@@ -25,6 +25,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Link>
 
       <div className="mt-4 grid grid-cols-1 gap-8 rounded-lg border border-slate-200 bg-white p-6 md:grid-cols-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.thumbnail}
           alt={product.title}
@@ -36,9 +37,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {product.brand ?? product.category}
           </p>
 
-          <h1 className="text-2xl font-semibold">{product.title}</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {product.title}
+          </h1>
 
-          <p className="text-2xl font-semibold">${product.price}</p>
+          <p className="text-2xl font-semibold text-slate-900">
+            ${product.price}
+          </p>
 
           <p className="text-sm text-slate-500">
             {product.stock} unidades disponibles

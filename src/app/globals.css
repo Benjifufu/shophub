@@ -1,22 +1,19 @@
 @import "tailwindcss";
 
+/*
+  El create-next-app trae por defecto un bloque
+  @media (prefers-color-scheme: dark) que invierte fondo y texto
+  según la configuración del sistema operativo.
+
+  Se elimina a propósito: la app define sus propios colores con clases
+  de Tailwind (bg-white, text-slate-900, etc.). Dejar el modo oscuro
+  automático hacía que el texto sin color explícito se volviera blanco
+  sobre tarjetas blancas.
+*/
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #0f172a;
 }
 
 body {

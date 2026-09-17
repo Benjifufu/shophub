@@ -9,7 +9,7 @@ export default async function CatalogPage() {
 
   return (
     <section>
-      <h1 className="mb-6 text-2xl font-semibold">Catálogo</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-slate-900">Catálogo</h1>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {products.map((product) => (
