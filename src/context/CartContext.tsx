@@ -10,6 +10,7 @@ interface CartContextType {
   items: CartItem[];
   totalItems: number;
   addItem: (product: Product) => void;
+  removeItem: (id: number) => void;
 }
 
 // 2. Se crea el contexto. Arranca en null porque su valor real
@@ -41,11 +42,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // filter también retorna un arreglo NUEVO, sin el ítem cuyo id coincide.
+  // No se usa splice() porque eso mutaría prevItems directamente.
+  const removeItem = (id: number) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
+
   // Valor derivado: no necesita su propio useState, se recalcula en cada render.
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, totalItems, addItem }}>
+    <CartContext.Provider value={{ items, totalItems, addItem, removeItem }}>
       {children}
     </CartContext.Provider>
   );

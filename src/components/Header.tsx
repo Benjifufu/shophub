@@ -15,12 +15,13 @@ export default function Header() {
           ShopHub
         </Link>
 
-        <div className="flex items-center gap-2 text-sm text-slate-700">
+        {/* Link normal: el carrito ahora es una página propia en /cart */}
+        <Link href="/cart" className="flex items-center gap-2 text-sm text-slate-700">
           <span>Carrito</span>
           <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-900 px-2 text-xs font-medium text-white">
             {totalItems}
           </span>
-        </div>
+        </Link>
       </nav>
     </header>
   );
