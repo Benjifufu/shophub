@@ -8,10 +8,12 @@ import { useCart } from "@/context/CartContext";
 export default function CartPage() {
   const { items, removeItem, updateQuantity } = useCart();
 
-  // Valor derivado, igual que totalItems en el contexto: se recalcula
-  // en cada render a partir de items, no se guarda en un useState aparte.
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  const { clearCart } = useCart();
+    <button onClick={clearCart}>Vaciar carrito</button>   
+
+    
   if (items.length === 0) {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
@@ -107,9 +109,30 @@ export default function CartPage() {
       <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
         <span className="text-lg font-semibold text-slate-900">Total</span>
         <span className="text-lg font-semibold text-slate-900">
-          ${total.toFixed(2)}
+          ${total}
         </span>
       </div>
+
+      <div className="mt-6 flex justify-end gap-4">
+        <button
+          onClick={clearCart}
+          className="rounded-md border border-red-200 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50"
+        >
+          Vaciar carrito
+        </button>
+        </div>
+
+      <Link
+        href="/checkout"
+        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Finalizar compra
+      </Link>
+
     </section>
   );
 }
+
+
+  
+
