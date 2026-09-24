@@ -5,7 +5,7 @@ const BASE_URL = "https://dummyjson.com/products";
 // Catálogo: 8 productos con solo los campos que la tarjeta necesita.
 export async function getProducts(): Promise<Product[]> {
   const res = await fetch(
-    `${BASE_URL}?limit=8&select=id,title,price,category,thumbnail,stock`
+    `${BASE_URL}?limit=20&select=id,title,price,category,thumbnail,stock`
   );
 
   if (!res.ok) {

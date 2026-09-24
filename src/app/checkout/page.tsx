@@ -4,35 +4,75 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function CheckoutPage() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, totalPrice } = useCart();
 
+  const [datos, setDatos] = useState({
+    nombre: "",
+    email: "",
+    metodoPago: "",
+    aceptaTerminos: false, // boolean, no string "on"
+  });
 
-  const [datos, setDatos] = useState({ nombre: "", email: "", metodoPago: "", terminosycondiciones:"" });
+  // Qué campos ya perdieron el foco al menos una vez. Los mensajes de
+  // error solo se muestran si touched[campo] es true -> así no aparecen
+  // apenas se abre la página, antes de que el usuario escriba nada.
+  const [touched, setTouched] = useState({ nombre: false, email: false });
+
+  const [enviando, setEnviando] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
 
-  const total = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+  const nombreValido = datos.nombre.trim().length >= 5;
+  const emailValido = EMAIL_REGEX.test(datos.email);
+  const esValido =
+    nombreValido && emailValido && datos.metodoPago.length > 0 && datos.aceptaTerminos;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Sirve para los inputs de texto y el select (comparten name/value).
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setDatos((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();      
-    setConfirmado(true);
-    clearCart();              
+  // El checkbox usa .checked (booleano), no .value: en el DOM, .value de
+  // un checkbox sin atributo value explícito siempre es "on", marcado o
+  // no -> usar handleChange aquí haría que nunca se pudiera desmarcar.
+  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDatos((prev) => ({ ...prev, aceptaTerminos: e.target.checked }));
   };
 
-  const esValido =
-    datos.nombre.length > 3 && datos.email.includes("@") && datos.metodoPago.length > 0 && datos.terminosycondiciones === "on";
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    if (name === "nombre" || name === "email") {
+      setTouched((prev) => ({ ...prev, [name]: true }));
+    }
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!esValido) return;
 
+    setEnviando(true);
+    // Simula la espera de red; evita envíos duplicados porque el botón
+    // queda disabled mientras enviando es true.
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
+    clearCart();
+    setConfirmado(true);
+    setEnviando(false);
+  };
+
+  // Este chequeo va ANTES del de "carrito vacío" a propósito: clearCart()
+  // deja items en [], así que si el orden fuera al revés, apenas se
+  // confirma el pedido la página mostraría "no hay nada para pedir" en
+  // vez del mensaje de éxito.
   if (confirmado) {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
-        <p className="text-lg font-semibold text-slate-900">¡Pedido confirmado</p>
+        <p className="text-lg font-semibold text-slate-900">¡Pedido confirmado!</p>
         <p className="text-slate-600">Te escribimos a {datos.email}.</p>
         <Link href="/" prefetch={false} className="text-slate-900 underline">
           Volver al catálogo
@@ -52,17 +92,16 @@ export default function CheckoutPage() {
     );
   }
 
-
   return (
     <section>
-        <Link href="/" className="text-sm text-slate-600 hover:underline">
+      <Link href="/" className="text-sm text-slate-600 hover:underline">
         Volver al catálogo
       </Link>
 
+      <h1 className="mb-4 mt-4 text-2xl font-semibold text-slate-900">
+        Confirmar pedido
+      </h1>
 
-      <h1 className="mb-4 text-2xl font-semibold text-slate-900">Confirmar pedido</h1>
-
-      
       <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
         {items.map((item) => (
           <div key={item.id} className="flex justify-between text-sm">
@@ -73,51 +112,69 @@ export default function CheckoutPage() {
 
         <div className="mt-2 flex justify-between border-t border-slate-200 pt-2 font-semibold">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>${totalPrice.toFixed(2)}</span>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          name="nombre"
-          value={datos.nombre}
-          onChange={handleChange}
-          placeholder="Nombre completo"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          type="email"  
-          name="email"
-          value={datos.email}
-          onChange={handleChange}
-          placeholder="Correo electrónico"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
+        <div>
+          <input
+            name="nombre"
+            value={datos.nombre}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="Nombre completo"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+          {touched.nombre && !nombreValido && (
+            <p className="mt-1 text-xs text-red-600">Mínimo 5 caracteres.</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            type="email"
+            name="email"
+            value={datos.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="Correo electrónico"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+          {touched.email && !emailValido && (
+            <p className="mt-1 text-xs text-red-600">Formato de correo inválido.</p>
+          )}
+        </div>
+
+        <select
           name="metodoPago"
           value={datos.metodoPago}
           onChange={handleChange}
-          placeholder="Método de pago (Tarjeta Debito, Tarjeta Crédito, Efectivo)"
           className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-        />
+        >
+          <option value="">Selecciona un método</option>
+          <option value="tarjeta-debito">Tarjeta débito</option>
+          <option value="tarjeta-credito">Tarjeta crédito</option>
+          <option value="efectivo">Efectivo</option>
+        </select>
+
         <label className="flex items-center gap-2 text-sm text-slate-600">
           <input
             type="checkbox"
-            name="terminosycondiciones"
-            checked={datos.terminosycondiciones === "on"}
-            onChange={handleChange}
+            name="aceptaTerminos"
+            checked={datos.aceptaTerminos}
+            onChange={handleCheckbox}
             className="rounded border-slate-300 text-slate-900 focus:ring-slate-500"
           />
           Acepto los términos y condiciones
         </label>
 
-    
         <button
           type="submit"
-          disabled={!esValido}
+          disabled={!esValido || enviando}
           className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:bg-slate-300"
         >
-          Confirmar pedido
+          {enviando ? "Procesando…" : "Confirmar pedido"}
         </button>
       </form>
     </section>

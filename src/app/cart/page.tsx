@@ -6,14 +6,8 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
 
-  const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  const { clearCart } = useCart();
-    <button onClick={clearCart}>Vaciar carrito</button>   
-
-    
   if (items.length === 0) {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
@@ -70,12 +64,13 @@ export default function CartPage() {
               </Link>
             </div>
 
-            {/* Control de cantidad: - / número / + */}
+            {/* Control de cantidad: - / número / +
+                Sin disabled en el "-": al llegar a 0, updateQuantity ya
+                elimina el ítem automáticamente (ver CartContext). */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => updateQuantity(item.id, -1)}
-                disabled={item.quantity === 1}
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300"
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-100"
               >
                 −
               </button>
@@ -109,30 +104,25 @@ export default function CartPage() {
       <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
         <span className="text-lg font-semibold text-slate-900">Total</span>
         <span className="text-lg font-semibold text-slate-900">
-          ${total}
+          ${totalPrice.toFixed(2)}
         </span>
       </div>
 
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mt-6 flex items-center justify-between gap-4">
         <button
           onClick={clearCart}
           className="rounded-md border border-red-200 px-4 py-2 text-sm text-red-600 transition hover:bg-red-50"
         >
           Vaciar carrito
         </button>
-        </div>
 
-      <Link
-        href="/checkout"
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-      >
-        Finalizar compra
-      </Link>
-
+        <Link
+          href="/checkout"
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+        >
+          Finalizar compra
+        </Link>
+      </div>
     </section>
   );
 }
-
-
-  
-
